@@ -1,9 +1,10 @@
 
-
 COMMENT = 0
 OPTVAL = 1
-BLANK = 2
-SECTION = 3
+OPTNV = 2
+BLANK = 3
+SECTION = 4
+
 
 import re
 
@@ -25,7 +26,7 @@ OPTVALRE = re.compile(
                                               # by any # space/tab
     r'(?P<value>.*)$'                     # everything up to eol
 )
-OPTVALNVRE = re.compile(
+OPTNVRE = re.compile(
     r'(?P<option>[^:=\s][^:=]*)'          # very permissive!
     r'\s*(?:'                             # any number of space/tab,
     r'(?P<separator>[:=])\s*'                    # optionally followed by
@@ -84,7 +85,9 @@ class ConfigLine:
 
 
     def __init__(self, line, COMMENTCHAR='#'):
+
         "Holds a single line of a config file"
+
         self.COMMENTCHAR = COMMENTCHAR
         self.section_name = None
         self.option = None
@@ -113,6 +116,12 @@ class ConfigLine:
             self.value = value.strip()
             return OPTVAL
 
+        optvalnv_match = OPTNVRE.match(self.rawline)
+        if optvalnv_match:
+            option, separator, value = optvalnv_match.group('option', 'separator', 'value')
+            self.option = option.strip()
+            return OPTNV
+
         raise ParseError(self.rawline)
 
     def set_section(self, section):
@@ -136,6 +145,10 @@ class ConfigLine:
         if self.linetype == OPTVAL:
             f.write("%s = %s\n" % (self.option, self.value))
             return
+        
+        if self.linetype == OPTNV:
+            f.write("%s" % self.option)
+            return
 
             
     def __str__(self):
@@ -152,15 +165,25 @@ class ConfigLine:
         if self.linetype == OPTVAL:
             return ("Optval: %s %s" % (self.option, self.value))
 
+        if self.linetype == OPTVALNV:
+            return ("Opt: %s " % self.option)
     
 
 
 class ConfigFile:
 
     
-    def __init__(self, infile, COMMENTCHAR='#'):
+    def __init__(self, infile=None, COMMENTCHAR='#', nosection_name = 'nosection'):
         ""
+        self.configlines = []
         self.COMMENTCHAR = COMMENTCHAR
+        self.nosection_name = nosection_name
+        self.sections = []
+
+        # if no infile then we just start with a blank ConfigFile
+        if infile is None:
+            return
+        
         self.filename = infile
         try:
             f = open(infile, "rb")
@@ -169,8 +192,10 @@ class ConfigFile:
         except:
             raise FileReadError(infile)
 
-        self.configlines = []
-        section_name = 'nosection'
+        self.read()
+
+    def read(self):
+        section_name = self.nosection_name
         self.sections = [section_name]
         for line in self.rawlines:
             cl = ConfigLine(line, self.COMMENTCHAR)
@@ -182,7 +207,7 @@ class ConfigFile:
             
             self.configlines.append(cl)
 
-    def opt_exists(self, section, opt, val):
+    def opt_exists(self, section, opt):
 
         if section not in self.sections:
             return False
@@ -225,7 +250,7 @@ class ConfigFile:
         if section not in self.sections:
             raise UnknownSectionError(section)
 
-        if self.opt_exists(section, opt, val):
+        if self.opt_exists(section, opt):
             raise DuplicateOptionError(section, opt)
             
         line = '%s = %s' % (opt, val)
@@ -237,6 +262,24 @@ class ConfigFile:
                 self.configlines.append(cl)
                 return
 
+    def add_optnv(self, section, opt):
+
+        if section not in self.sections:
+            raise UnknownSectionError(section)
+
+        if self.opt_exists(section, opt):
+            raise DuplicateOptionError(section, opt)
+            
+        line = '%s' % opt
+            
+        for l in self.configlines:
+            if l.section_name == section:
+                cl = ConfigLine(line)
+                cl.section_name = section
+                self.configlines.append(cl)
+                return
+
+            
     def add_section(self, section):
 
         if section in self.sections:
@@ -280,6 +323,8 @@ if __name__ == '__main__':
 
         c.set_opt('Main', 'arm_freq', '1000')
         c.add_section('PI')
+        c.add_opt('PI', 'boot', 'fast')
+                
 
         c.save('config.out')
 
@@ -288,3 +333,13 @@ if __name__ == '__main__':
 
         print c.get_opt('Main', 'arm_freq')
             
+
+        c2 = ConfigFile()
+        c2.add_section('Main')
+        c2.add_opt('Main', 'a_parm', 'a_value')
+
+
+        c2.add_section('Another Section')
+        c2.add_optnv('Another Section', 'anotherparm')
+
+        c2.save('new_config.txt')
