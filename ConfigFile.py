@@ -1,7 +1,5 @@
 
 
-COMMENTCHAR = '#'
-
 COMMENT = 0
 OPTVAL = 1
 BLANK = 2
@@ -85,8 +83,9 @@ class DuplicateOptionError(Exception):
 class ConfigLine:
 
 
-    def __init__(self, line):
+    def __init__(self, line, COMMENTCHAR='#'):
         "Holds a single line of a config file"
+        self.COMMENTCHAR = COMMENTCHAR
         self.section_name = None
         self.option = None
         self.value = None
@@ -96,7 +95,7 @@ class ConfigLine:
 
     def _gettype(self):
 
-        if self.rawline.startswith(COMMENTCHAR):
+        if self.rawline.startswith(self.COMMENTCHAR):
             return COMMENT
 
         if self.rawline.isspace() or self.rawline == '':
@@ -159,8 +158,9 @@ class ConfigLine:
 class ConfigFile:
 
     
-    def __init__(self, infile):
+    def __init__(self, infile, COMMENTCHAR='#'):
         ""
+        self.COMMENTCHAR = COMMENTCHAR
         self.filename = infile
         try:
             f = open(infile, "rb")
@@ -173,7 +173,7 @@ class ConfigFile:
         section_name = 'nosection'
         self.sections = [section_name]
         for line in self.rawlines:
-            cl = ConfigLine(line)
+            cl = ConfigLine(line, self.COMMENTCHAR)
             if cl.section_name is None:
                 cl.section_name = section_name
             else:
@@ -207,7 +207,19 @@ class ConfigFile:
 
         raise UnknownOptionError(opt)
 
+    def get_opt(self, section, opt):
 
+        if section not in self.sections:
+            raise UnknownSectionError(section)
+
+        for l in self.configlines:
+            if l.section_name == section and l.linetype == OPTVAL:
+                if opt == l.option:
+                    return l.value
+
+        raise UnknownOptionError(opt)
+
+    
     def add_opt(self, section, opt, val):
 
         if section not in self.sections:
@@ -228,7 +240,7 @@ class ConfigFile:
     def add_section(self, section):
 
         if section in self.sections:
-            raise SectionExistsError
+            raise SectionExistsError(section)
 
         self.sections.append(section)
 
@@ -273,3 +285,6 @@ if __name__ == '__main__':
 
         for l in c.configlines:
             print "Section: %s %s" % (l.section_name, str(l))
+
+        print c.get_opt('Main', 'arm_freq')
+            
