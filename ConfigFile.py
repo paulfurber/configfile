@@ -62,6 +62,13 @@ class UnknownSectionError(Exception):
 
         Exception.__init__(self, "No section with name %s" % section)
 
+class SectionExistsError(Exception):
+
+    def __init__(self, section):
+
+        Exception.__init__(self, "Section exists with name %s" % section)
+
+        
 class UnknownOptionError(Exception):
 
     def __init__(self, option):
@@ -108,6 +115,10 @@ class ConfigLine:
             return OPTVAL
 
         raise ParseError(self.rawline)
+
+    def set_section(self, section):
+
+        self.section_name = section
 
     def write(self, f):
 
@@ -169,7 +180,7 @@ class ConfigFile:
             
             self.configlines.append(cl)
 
-    def exists(self, section, opt, val):
+    def opt_exists(self, section, opt, val):
 
         if section not in self.sections:
             return False
@@ -181,7 +192,7 @@ class ConfigFile:
 
         return False
             
-    def set(self, section, opt, val):
+    def set_opt(self, section, opt, val):
 
         if section not in self.sections:
             raise UnknownSectionError(section)
@@ -195,12 +206,12 @@ class ConfigFile:
         raise UnknownOptionError(opt)
 
 
-    def add(self, section, opt, val):
+    def add_opt(self, section, opt, val):
 
         if section not in self.sections:
             raise UnknownSectionError(section)
 
-        if self.exists(section, opt, val):
+        if self.opt_exists(section, opt, val):
             raise DuplicateOptionError(section, opt)
             
         line = '%s = %s' % (opt, val)
@@ -212,7 +223,20 @@ class ConfigFile:
                 self.configlines.append(cl)
                 return
 
-    
+    def add_section(self, section):
+
+        if section in self.sections:
+            raise SectionExistsError
+
+        self.sections.append(section)
+
+        # add a leading blank line
+        blank = ConfigLine('\n')
+        blank.set_section(section)
+        self.configlines.append(blank)
+        # now add the new section
+        self.configlines.append(ConfigLine('[%s]' % section))
+        
 
     def save(self, filename=''):
 
@@ -234,13 +258,15 @@ class ConfigFile:
 
 if __name__ == '__main__':
 
-        c = ConfigFile('test.conf')
+        c = ConfigFile('config.txt')
+
+        print c.sections
+        
+
+        c.set_opt('Main', 'arm_freq', '1000')
+        c.add_section('PI')
+
+        c.save('config.out')
 
         for l in c.configlines:
             print "Section: %s %s" % (l.section_name, str(l))
-
-        print c.sections
-
-        c.set('Boot', 'arm_freq', '1000')
-        
-        c.save('out.conf')
