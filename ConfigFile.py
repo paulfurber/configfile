@@ -20,19 +20,19 @@ SECTCRE = re.compile(
 )
 OPTVALRE = re.compile(
     r'(?P<option>[^:=\s][^:=]*)'          # very permissive!
-    r'\s*(?P<separator>[:=])\s*'                 # any number of space/tab,
-                                              # followed by separator
-                                              # (either : or =), followed
-                                              # by any # space/tab
+    r'\s*(?P<separator>[:=])\s*'          # any number of space/tab,
+                                          # followed by separator
+                                          # (either : or =), followed
+                                          # by any # space/tab
     r'(?P<value>.*)$'                     # everything up to eol
 )
 OPTNVRE = re.compile(
     r'(?P<option>[^:=\s][^:=]*)'          # very permissive!
     r'\s*(?:'                             # any number of space/tab,
-    r'(?P<separator>[:=])\s*'                    # optionally followed by
-                                              # separator (either : or
-                                              # =), followed by any #
-                                              # space/tab
+    r'(?P<separator>[:=])\s*'             # optionally followed by
+                                          # separator (either : or
+                                          # =), followed by any #
+                                          # space/tab
     r'(?P<value>.*))?$'                   # everything up to eol
 )
 
@@ -337,7 +337,6 @@ if __name__ == '__main__':
         c2 = ConfigFile()
         c2.add_section('Main')
         c2.add_opt('Main', 'a_parm', 'a_value')
-
 
         c2.add_section('Another Section')
         c2.add_optnv('Another Section', 'anotherparm')
