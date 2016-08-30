@@ -158,12 +158,14 @@ class ConfigLine:
 
 class ConfigFile:
 
+    
     def __init__(self, infile):
         ""
         self.filename = infile
         try:
             f = open(infile, "rb")
             self.rawlines = f.readlines()
+            f.close()
         except:
             raise FileReadError(infile)
 
@@ -249,6 +251,7 @@ class ConfigFile:
                 for line in self.configlines:
                     if line.section_name == section:
                         line.write(f)
+            f.close()
         except:
             raise FileWriteError(self.filename)
         
