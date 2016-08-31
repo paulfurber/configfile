@@ -174,7 +174,7 @@ class ConfigFile:
 
     
     def __init__(self, infile=None, COMMENTCHAR='#', nosection_name = 'nosection'):
-        ""
+        
         self.configlines = []
         self.COMMENTCHAR = COMMENTCHAR
         self.nosection_name = nosection_name
@@ -195,6 +195,7 @@ class ConfigFile:
         self.read()
 
     def read(self):
+        
         section_name = self.nosection_name
         self.sections = [section_name]
         for line in self.rawlines:
@@ -332,7 +333,7 @@ if __name__ == '__main__':
             print "Section: %s %s" % (l.section_name, str(l))
 
         print c.get_opt('Main', 'arm_freq')
-            
+        print c.get_opt('Main', 'network_init_order').split(',')
 
         c2 = ConfigFile()
         c2.add_section('Main')
