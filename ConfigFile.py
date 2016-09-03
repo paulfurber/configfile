@@ -1,12 +1,15 @@
 
-COMMENT = 0
-OPTVAL = 1
-OPTNV = 2
-BLANK = 3
-SECTION = 4
-
 
 import re
+
+
+# types of config line
+COMMENT = 0   # this is a comment
+OPTVAL = 1    # option=value
+OPTNV = 2     # option
+BLANK = 3     #
+SECTION = 4   # [Main]
+
 
 #
 # Regular expressions for parsing section headers and options.
@@ -35,6 +38,8 @@ OPTNVRE = re.compile(
                                           # space/tab
     r'(?P<value>.*))?$'                   # everything up to eol
 )
+
+# Error reporting
 
 class FileReadError(Exception):
 
@@ -86,7 +91,7 @@ class ConfigLine:
 
     def __init__(self, line, COMMENTCHAR='#'):
 
-        "Holds a single line of a config file"
+        """Holds a single line of a config file"""
 
         self.COMMENTCHAR = COMMENTCHAR
         self.section_name = None
@@ -98,6 +103,8 @@ class ConfigLine:
 
     def _gettype(self):
 
+        """Parse line and detect its type"""
+        
         if self.rawline.startswith(self.COMMENTCHAR):
             return COMMENT
 
@@ -130,6 +137,8 @@ class ConfigLine:
 
     def write(self, f):
 
+        """Write line to a file pointer"""
+        
         if self.linetype == SECTION:
             f.write('[%s]\n' % self.section_name)
             return
@@ -153,6 +162,8 @@ class ConfigLine:
             
     def __str__(self):
 
+        """Sensible string representation"""
+
         if self.linetype == SECTION:
             return ("Section header: %s" % self.section_name)
 
@@ -167,22 +178,34 @@ class ConfigLine:
 
         if self.linetype == OPTVALNV:
             return ("Opt: %s " % self.option)
+
+        return "Unknown line type"
     
 
 
 class ConfigFile:
 
     
-    def __init__(self, infile=None, COMMENTCHAR='#', nosection_name = 'nosection'):
+    def __init__(self, COMMENTCHAR='#', nosection_name = 'nosection'):
+
+        """
+        A configuration file class. 
+        """
         
         self.configlines = []
+        self.infile = None
         self.COMMENTCHAR = COMMENTCHAR
         self.nosection_name = nosection_name
         self.sections = []
 
+
+    def read(self, infile=None):
+
+        
         # if no infile then we just start with a blank ConfigFile
         if infile is None:
             return
+
         
         self.filename = infile
         try:
@@ -192,10 +215,6 @@ class ConfigFile:
         except:
             raise FileReadError(infile)
 
-        self.read()
-
-    def read(self):
-        
         section_name = self.nosection_name
         self.sections = [section_name]
         for line in self.rawlines:
@@ -317,7 +336,8 @@ class ConfigFile:
 
 if __name__ == '__main__':
 
-        c = ConfigFile('config.txt')
+        c = ConfigFile()
+        c.read('config.txt')
 
         print c.sections
         
