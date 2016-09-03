@@ -186,7 +186,7 @@ class ConfigLine:
 class ConfigFile:
 
     
-    def __init__(self, COMMENTCHAR='#', nosection_name = 'nosection'):
+    def __init__(self, COMMENTCHAR='#', topsection_name = 'topsection'):
 
         """
         A configuration file class. 
@@ -195,17 +195,15 @@ class ConfigFile:
         self.configlines = []
         self.infile = None
         self.COMMENTCHAR = COMMENTCHAR
-        self.nosection_name = nosection_name
+        self.topsection_name = topsection_name
         self.sections = []
 
 
     def read(self, infile=None):
 
-        
         # if no infile then we just start with a blank ConfigFile
         if infile is None:
             return
-
         
         self.filename = infile
         try:
@@ -215,7 +213,7 @@ class ConfigFile:
         except:
             raise FileReadError(infile)
 
-        section_name = self.nosection_name
+        section_name = self.topsection_name
         self.sections = [section_name]
         for line in self.rawlines:
             cl = ConfigLine(line, self.COMMENTCHAR)
