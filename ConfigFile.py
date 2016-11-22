@@ -6,7 +6,7 @@ import re
 # types of config line
 COMMENT = 0   # this is a comment
 OPTVAL = 1    # option=value
-OPTNV = 2     # option
+OPTNV = 2  # option
 BLANK = 3     #
 SECTION = 4   # [Main]
 
@@ -152,7 +152,7 @@ class ConfigLine:
             return
 
         if self.linetype == OPTVAL:
-            f.write("%s = %s\n" % (self.option, self.value))
+            f.write("%s=%s\n" % (self.option, self.value))
             return
         
         if self.linetype == OPTNV:
@@ -176,7 +176,7 @@ class ConfigLine:
         if self.linetype == OPTVAL:
             return ("Optval: %s %s" % (self.option, self.value))
 
-        if self.linetype == OPTVALNV:
+        if self.linetype == OPTNV:
             return ("Opt: %s " % self.option)
 
         return "Unknown line type"
@@ -271,7 +271,7 @@ class ConfigFile:
         if self.opt_exists(section, opt):
             raise DuplicateOptionError(section, opt)
             
-        line = '%s = %s' % (opt, val)
+        line = '%s=%s' % (opt, val)
             
         for l in self.configlines:
             if l.section_name == section:
