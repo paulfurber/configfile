@@ -1,4 +1,9 @@
 
+# ConfigFile 0.1
+# LICENSE: Python Software Foundation License
+# Treat it as if it were part of Python 2.7 and you'll be fine
+# Copyright 2016 Paul Furber (paul.furber@gmail.com)
+
 
 import re
 
@@ -6,7 +11,7 @@ import re
 # types of config line
 COMMENT = 0   # this is a comment
 OPTVAL = 1    # option=value
-OPTNV = 2  # option
+OPTNV = 2     # option
 BLANK = 3     #
 SECTION = 4   # [Main]
 
@@ -88,10 +93,9 @@ class DuplicateOptionError(Exception):
         
 class ConfigLine:
 
+    """Holds a single line of a config file"""
 
     def __init__(self, line, COMMENTCHAR='#'):
-
-        """Holds a single line of a config file"""
 
         self.COMMENTCHAR = COMMENTCHAR
         self.section_name = None
