@@ -36,15 +36,17 @@
     from ConfigFile import ConfigFile
     c = ConfigFile()
     c.read('config.txt')
-    c.get_opt('Main', 'arm_freq')
-    
+    arm_freq = c.get_opt('Main', 'arm_freq')
+```
     
 ## Tests
 
-  In the test/ directory.
-  
+  Yep. In the test/ directory.
+ 
   
 ## TODO
+
+API reference and write examples
 
 ConfigFile should work on Windows with ini files but I haven't tested
 it yet. 
