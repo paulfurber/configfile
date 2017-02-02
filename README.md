@@ -31,15 +31,20 @@
 
 ## Example config file
 
-```python
-  first_option another_option
+```text
+  first_option 
+  
+  another_option
 
   [First_section]
 
-
-  player = mplayer skip = True boot_order=SSD,USB,internal
+  player = mplayer skip = True 
+  
+  boot_order=SSD,USB,internal
 
   [Second section]
 
-  startx = true shutdown_early
+  startx = true 
+  
+  shutdown_early
 ```
