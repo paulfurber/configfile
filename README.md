@@ -29,22 +29,28 @@
   - Uses the same regexes as ConfigFileParser
 
 
-## Example config file
+## Example
 
-```text
-  first_option 
+```python
+
+    from ConfigFile import ConfigFile
+    c = ConfigFile()
+    c.read('config.txt')
+    c.get_opt('Main', 'arm_freq')
+    
+    
+## Tests
+
+  In the test/ directory.
   
-  another_option
-
-  [First_section]
-
-  player = mplayer skip = True 
   
-  boot_order=SSD,USB,internal
+## TODO
 
-  [Second section]
+ConfigFile should work on Windows with ini files but I haven't tested
+it yet. 
 
-  startx = true 
-  
-  shutdown_early
-```
+Some things like file reading and writing needs to be made more
+Pythonic. 
+
+Contributions welcome!
+
